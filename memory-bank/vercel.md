@@ -28,7 +28,8 @@ Vercel CLI를 사용하는 경우 프로젝트 폴더에서 `npx vercel`을 실�
 ### 2026-10-09 — GitHub push 자동 배포 확인
 
 - 사용자의 Vercel 등록 후 `vercel-othello` 최근 커밋 `c4d6a16`의 GitHub 상태를 조회했다. `Vercel` 검사가 `success`, 설명은 `Deployment has completed`였다.
-- 이 확인 기록을 새 커밋으로 push해 새 커밋에서도 자동 배포가 시작되고 완료되는지 확인한다.
+- 확인 기록을 커밋 `514254a`로 push했다. Vercel 상태가 `pending` (`Vercel is deploying your app`)에서 `success` (`Deployment has completed`)로 바뀌는 것을 확인했다. GitHub 배포 환경은 `Preview`다.
+- `vercel-othello`에 push하면 Vercel Preview가 자동 배포되는 연결이 확인됐다. 운영 사이트 갱신은 Vercel에서 지정한 Production Branch에 push해야 한다.
 - 문서만 변경하므로 로컬 테스트와 빌드는 실행하지 않는다. 실제 Vercel 자동 배포 결과는 GitHub 커밋 상태로 확인한다.
 
 ### 2026-10-09 — 배포 준비

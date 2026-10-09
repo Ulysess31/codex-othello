@@ -4,7 +4,7 @@
 
 이 문서는 프로젝트 파일의 책임과 코드 사이의 연결 방식을 설명한다. 게임 기능과 사용자 동작은 `design-document.md`, 구현 순서와 완료 조건은 `implement.md`, 공통 개발 규칙은 저장소 루트 `AGENTS.md`를 기준으로 한다. 이 문서는 구조를 설명하며 요구사항이나 작업 상태를 대신 관리하지 않는다.
 
-현재는 1·2단계가 완료됐고 3단계 게임 UI와 규칙 엔진 연결을 구현했다. 브라우저에서 직접 클릭하는 수작업 확인은 남아 있으며, 키보드 방향키 탐색 등은 4단계에서 보완한다. 아래에서 **구성됨**과 **예정**을 구분한다.
+1·2단계는 완료됐다. 3·4단계 기능과 자동 검증 코드도 구현했지만 실제 브라우저 클릭·키보드·화면 크기 확인은 남아 있다. 아래에서 코드 구성과 수작업 확인 상태를 구분한다.
 
 ## 초보자를 위한 도구 안내
 
@@ -37,17 +37,22 @@
 
 ```text
 AGENTS.md                  # 저장소 전체 개발 규칙
+README.md                  # 설치, 실행, 확인 명령과 주요 파일 안내
 index.html                 # 브라우저 문서와 React 마운트 지점
 package.json               # 의존성과 개발 명령
 package-lock.json          # 실제 설치된 패키지 버전 고정
 vite.config.js             # Vite, React, Vitest 설정
+.github/workflows/deploy.yml # main 변경 때 GitHub Pages 빌드·배포
+vercel.json                # Vercel 설치·빌드·정적 출력 설정
 eslint.config.js           # JavaScript와 React 훅 검사 규칙
 src/
   main.jsx                 # React 앱을 브라우저에 연결하는 진입점
   App.jsx                  # 게임 상태와 화면을 연결
   setup.test.jsx           # 초기 게임 화면 렌더링 확인
   components/
-    Board.jsx              # 8×8 보드와 칸 선택 버튼
+    Board.jsx              # 8×8 보드, 칸 버튼과 키보드 포커스 이동
+    boardNavigation.js     # 방향키 입력을 다음 보드 좌표로 바꾸는 순수 함수
+    Board.test.jsx         # 방향키 이동 계산과 가장자리 처리 테스트
     GameInfo.jsx           # 차례, 점수, 안내와 새 게임
   game/
     othello.js             # 화면과 분리된 오델로 규칙 함수
@@ -58,6 +63,8 @@ memory-bank/
   implement.md             # 구현 단계와 완료 조건
   progress.md              # 현재 진행 상태와 작업 기록
   architecture.md          # 파일 책임과 구조 설명
+  prompt.md                # 대화에서 사용자가 요청한 프롬프트 기록
+  vercel.md                # Vercel 배포 준비와 실행 이력
 ```
 
 ## 파일의 책임
@@ -65,15 +72,21 @@ memory-bank/
 | 파일 | 상태 | 책임 |
 | --- | --- | --- |
 | `index.html` | 구성됨 | 한국어 문서 메타데이터, 페이지 제목, React가 연결될 `#root`, `src/main.jsx` 진입 스크립트를 제공한다. |
+| `README.md` | 구성됨 | Node.js 준비 후 설치·실행하는 법과 npm 검증 명령을 초보자 눈높이에서 안내한다. 주요 코드·계획 문서의 역할도 찾아볼 수 있다. |
 | `src/main.jsx` | 구성됨 | `App`과 전역 CSS를 불러오고 React 루트를 생성한다. 앱 시작 연결만 맡는다. |
 | `src/App.jsx` | 구성됨 | 게임 상태를 보관하고 보드 입력을 규칙 함수에 전달한다. 계산된 보드, 차례, 점수, 결과를 화면 컴포넌트에 내려준다. 새 게임과 무효 수 안내도 처리한다. |
-| `src/styles/app.css` | 구성됨 | 보드, 돌, 점수 카드와 작은 화면 배치를 스타일링한다. 키보드 방향 이동 등은 다음 접근성 단계에서 추가한다. |
-| `src/setup.test.jsx` | 구성됨 | 초기 화면이 64칸, 시작 가능한 위치, 차례·점수, 새 게임 버튼을 렌더링하는지 확인한다. 마우스 클릭 동작을 자동 시험하는 테스트는 아니다. |
-| `src/components/Board.jsx` | 구성됨 | 64개 보드 버튼과 돌, 합법 수 표시를 그린다. 좌표와 칸 상태를 이름으로 제공하고 선택 좌표를 부모에 전달하지만 게임 규칙은 계산하지 않는다. |
+| `src/styles/app.css` | 구성됨 | 보드, 돌, 점수 카드, 작은 화면 배치와 눈에 띄는 키보드 포커스를 스타일링한다. |
+| `src/setup.test.jsx` | 구성됨 | 초기 화면의 64칸, 가능한 수, 차례·점수, 새 게임 버튼, 하나의 Tab 진입점, 칸 설명을 확인한다. 실제 클릭이나 브라우저 레이아웃을 자동 시험하지는 않는다. |
+| `src/components/Board.jsx` | 구성됨 | 64개 보드 버튼과 돌·합법 수 표시를 그린다. 좌표와 놓을 수 있는지 이름으로 읽어주며, Tab으로 한 번 진입하고 방향키로 포커스를 옮긴다. Enter와 Space는 버튼 기본 동작으로 착수한다. 게임 규칙은 계산하지 않는다. |
+| `src/components/Board.test.jsx` | 구성됨 | 네 방향키 좌표 계산, 보드 가장자리에서 멈춤, 방향키가 아닌 입력을 자동 확인한다. 실제 브라우저의 포커스 이동을 자동 조작하지는 않는다. |
+| `src/components/boardNavigation.js` | 구성됨 | 방향키 이름과 현재 좌표를 받아 다음 좌표를 계산한다. 보드 경계에서는 0~7 범위 안에 머물고, 방향키가 아닌 키에는 이동 좌표 대신 `null`을 반환한다. |
 | `src/components/GameInfo.jsx` | 구성됨 | 현재 차례, 흑·백 점수, 안내·결과 메시지와 새 게임 버튼을 표시한다. |
 | `src/game/othello.js` | 구성됨 | `createInitialBoard`, `getFlips`, `getLegalMoves`, `applyMove`, `getNextTurn`, `countDiscs`로 초기 보드, 합법 수, 뒤집기, 불변 보드 갱신, 차례·패스·종료와 점수를 계산한다. React나 브라우저 화면에 의존하지 않는다. |
 | `src/game/othello.test.js` | 구성됨 | Vitest로 초기 배치, 여덟 방향 뒤집기, 경계·무효 수, 입력 보드 보존, 차례 변경·패스·종료와 승패를 확인한다. |
-| `vite.config.js` | 구성됨 | React JSX 변환과 Vitest 실행 환경을 설정한다. |
+| `vite.config.js` | 구성됨 | React JSX 변환과 Vitest 실행 환경을 설정하고, Vercel 배포에서는 `/`, GitHub Pages에서는 `/codex-othello/`를 정적 파일 기준 경로로 사용한다. |
+| `vercel.json` | 추가됨 | Vercel이 npm 의존성을 설치하고 Vite 빌드를 실행한 뒤 `dist/` 폴더를 정적 사이트로 게시하도록 설정한다. |
+| `memory-bank/vercel.md` | 추가됨 | Vercel 배포 브랜치, 설정 과정, 수동 확인 방법과 배포 결과를 기록한다. |
+| `.github/workflows/deploy.yml` | 추가됨 | `main` 브랜치에 push되거나 수동 실행을 요청하면 GitHub Actions가 Pages 설정을 확인하고 Node.js 의존성을 설치해 `dist/`를 빌드·게시한다. |
 | `eslint.config.js` | 구성됨 | 브라우저 JavaScript를 검사하고 ESLint 기본 및 React 훅 규칙을 적용한다. |
 | `package.json` | 구성됨 | 개발, 빌드, 미리보기, lint, 테스트 명령과 직접 의존성을 선언한다. |
 | `package-lock.json` | 구성됨 | 재설치 시 같은 의존성 트리를 사용하도록 실제 버전을 고정한다. |
@@ -82,6 +95,7 @@ memory-bank/
 | `memory-bank/implement.md` | 구성됨 | 설계 요구를 코드로 옮기는 순서와 단계별 완료 조건을 정의한다. |
 | `memory-bank/progress.md` | 구성됨 | 완료·진행·미완료 작업과 마지막 검증을 기록한다. |
 | `memory-bank/architecture.md` | 구성됨 | 이 파일 구조와 설계 의도를 설명한다. |
+| `memory-bank/prompt.md` | 구성됨 | 이 대화에서 사용자가 직접 요청한 프롬프트를 시간순으로 모아둔다. |
 
 ## 자동 테스트는 어디에 적나?
 
@@ -91,12 +105,13 @@ memory-bank/
 | --- | --- |
 | `package.json`의 `"test": "vitest run"` | `npm run test`를 입력했을 때 Vitest를 실행하라는 연결 설정이다. |
 | `src/game/othello.test.js` | 오델로 규칙 테스트 14개의 실제 시나리오와 기대 결과가 적혀 있다. `describe`는 관련 테스트를 묶고, `it`은 개별 상황을 정하며, `expect`는 실제 결과가 예상과 같은지 비교한다. |
-| `src/setup.test.jsx` | React 기본 화면이 렌더링되는지 확인하는 시작 테스트 1개가 적혀 있다. |
+| `src/setup.test.jsx` | React 기본 화면 1개를 확인한다. 64칸, 초기 합법 수와 하나의 Tab 진입점, 칸별 설명이 화면 결과에 담기는지도 검사한다. |
+| `src/components/Board.test.jsx` | `boardNavigation.js`의 네 방향 좌표 계산과 보드 가장자리 처리를 검사한다. |
 | `src/game/othello.js` | 테스트가 부르는 실제 게임 규칙 함수가 구현되어 있다. 테스트는 이 파일의 결과를 예상값과 비교한다. |
 | `memory-bank/implement.md` | 어떤 종류의 상황을 테스트해야 하는지 계획과 완료 기준을 적는다. |
 | `memory-bank/progress.md` | 테스트 명령을 실행한 날의 결과와 검증 이유를 기록한다. 테스트 조건 자체를 적는 파일은 아니다. |
 
-현재 전체 테스트는 15개다. 이 가운데 14개는 규칙 엔진, 1개는 React가 초기 게임 화면을 렌더링하는지 확인한다. 화면 테스트는 64칸과 시작 상태 표시를 확인하지만 실제 클릭은 대신해주지 않는다. 실제 클릭·새 게임 확인창·모바일 배치는 브라우저에서 직접 확인해야 한다. 예를 들어 “상대 차례에 둘 수가 없으면 패스한다” 테스트는 `othello.test.js`에서 보드 상황을 만들고 `getNextTurn` 결과가 예상과 같은지 비교한다. `npm run test`가 이 두 테스트 파일을 자동 실행한다. 테스트를 추가하면 실제 조건은 테스트 파일에, 실행 결과와 이유는 `progress.md`에 기록한다.
+현재 전체 테스트는 18개다. 이 가운데 14개는 규칙 엔진, 1개는 React 화면 표시, 3개는 방향키 좌표 계산을 확인한다. 화면 테스트는 보드의 하나의 Tab 진입점과 칸 설명도 확인하지만 실제 클릭, 실제 DOM 포커스 이동, 모바일 배치를 대신해주지 않는다. 이 부분은 브라우저에서 직접 확인해야 한다. 예를 들어 “상대 차례에 둘 수가 없으면 패스한다” 테스트는 `othello.test.js`에서 보드 상황을 만들고 `getNextTurn` 결과가 예상과 같은지 비교한다. `npm run test`가 세 테스트 파일을 자동 실행한다. 테스트를 추가하면 실제 조건은 테스트 파일에, 실행 결과와 이유는 `progress.md`에 기록한다.
 
 ## 의존 관계와 데이터 흐름
 

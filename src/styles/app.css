@@ -75,6 +75,17 @@ button {
   box-shadow: 0 1.25rem 2.5rem rgb(27 56 43 / 14%);
 }
 
+.board-area {
+  min-width: 0;
+}
+
+.board-instructions {
+  margin: 0 0 0.65rem;
+  color: var(--color-muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
 .board-cell {
   position: relative;
   display: grid;

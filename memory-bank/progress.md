@@ -4,7 +4,7 @@
 
 - **단계:** GitHub Pages 배포 완료, 브라우저 수작업 확인 대기
 - **마지막 업데이트:** 2026-10-09
-- **현재 작업:** GitHub Pages가 게시됐고, 사용자가 GitHub 화면에서 배포 설정을 확인하고 다시 실행하는 방법을 이 문서에 정리했다.
+- **현재 작업:** GitHub Pages와 Vercel 임시 배포가 준비됐다. Vercel 계정 연결은 되어 있지 않아 임시 배포를 claim하거나 Vercel에서 저장소를 연결해야 브랜치 자동 배포를 설정할 수 있다. 상세 이력은 `vercel.md`에 있다.
 - **전체 진행:** 1~5단계의 코드와 문서, 자동 검증은 완료했다. 테스트·lint·build가 통과했고 production preview에서 HTTP 200을 확인했다. 조작 가능한 브라우저 세션이 연결되지 않아 실제 클릭·키보드·화면 크기 수작업 확인이 남았다.
 
 ## 완료한 작업
@@ -30,6 +30,8 @@
 - [x] 사용자의 승인에 따라 저장소를 공개로 전환하고 GitHub Pages를 Actions 게시 방식으로 활성화했다.
 - [x] GitHub Actions 배포가 성공하고 Pages 주소가 정상 응답하는지 확인했다.
 - [x] GitHub 화면에서 Pages 게시 방식 확인, workflow 수동 실행, 자동 배포 흐름을 따라 할 수 있게 정리했다.
+- [x] `vercel-othello` 브랜치를 원격에 push하고 Vercel 배포 설정을 추가했다.
+- [x] Vercel 임시 배포와 페이지·정적 자산 HTTP 200 응답을 확인했다. Vercel 계정 연결과 지속적인 브랜치 자동 배포는 남아 있다.
 
 ## 진행 중
 
@@ -87,6 +89,13 @@
 6. 실행 결과에서 **deploy** 작업까지 성공하면 위 Pages 주소를 새로고침한다. 첫 게시나 설정 변경 직후에는 사이트가 반영되기까지 잠시 기다려야 할 수 있다.
 
 현재 저장소는 공개 상태다. 이 GitHub 계정의 요금제는 비공개 저장소의 Pages를 지원하지 않아 비공개로 되돌리면 게시할 수 없다. 저장소 공개 범위를 바꾸면 소스 코드와 Git 기록의 공개 여부도 함께 바뀐다.
+
+## Vercel 배포 현황
+
+- 배포 브랜치: `vercel-othello` (원격 `origin/vercel-othello`까지 push 완료)
+- 임시 Vercel 배포: <https://temporary-speedy-spinel-tk2ys5s.vercel.app/>. CLI 로그아웃 상태에서 만든 익명 임시 주소이며 60분 후 만료된다.
+- 페이지와 JS·CSS 파일은 모두 HTTP 200으로 응답했다. Vercel CLI 계정 연결은 되지 않아 이 임시 배포는 저장소 자동 배포 프로젝트와 연결되지 않았다.
+- 계속 쓰려면 Vercel에 로그인해 임시 배포를 claim하거나, `vercel.md` 절차대로 GitHub 저장소를 가져와 `vercel-othello` 브랜치의 Preview 배포를 설정한다.
 
 - 기반 프로젝트는 React 19.3.0, Vite 8.3.2, Vitest 5.0.3으로 설치됐다. 정확한 의존성 트리는 `package-lock.json`에 고정돼 있다.
 - 현재 Vitest는 React 화면 테스트 1개, 오델로 규칙 테스트 14개, 키보드 좌표 이동 테스트 3개로 총 18개를 실행한다.

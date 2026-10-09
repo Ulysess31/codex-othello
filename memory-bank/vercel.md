@@ -10,7 +10,7 @@
 - Vite는 Vercel 빌드 환경에서 사이트 주소의 루트(`/`)를 사용하고, 그 밖의 빌드에서는 GitHub Pages의 `/codex-othello/` 경로를 사용하도록 설정했다.
 - 저장소 루트 `vercel.json`에 Vite 프레임워크, `npm ci` 설치 명령, `npm run build` 빌드 명령, `dist` 출력 폴더를 지정했다.
 - 원격 브랜치 `origin/vercel-othello`에 현재 앱과 설정을 push했다.
-- 로그아웃 상태에서 만든 임시 Preview가 준비됐고, 60분 후 만료된다.
+- 로그아웃 상태에서 만든 임시 배포가 준비됐고, 60분 후 만료된다. Git 저장소에 연결된 Vercel 프로젝트의 지속적인 Preview와는 다르다.
 - Vercel 계정 연결은 아직 하지 않았다. 브랜치 자동 배포와 장기 유지가 필요하면 아래 대시보드 절차로 저장소를 연결한다.
 
 ## 직접 확인하고 배포하는 방법
@@ -32,6 +32,6 @@ Vercel CLI를 사용하는 경우 프로젝트 폴더에서 `npx vercel`을 실�
 - Vercel이 빌드 설정을 읽도록 `vercel.json`을 추가했다.
 - Vercel CLI 63.1.0을 `npx`로 실행했다. `vercel whoami`에서 현재 CLI가 로그아웃 상태임을 확인했다.
 - 작업 중인 저장소에서 임시 배포를 바로 만들 때는 `npm ci`가 Windows 파일 잠금 오류로 실패했다. `npm install`로 로컬 의존성을 복구했고, Vercel 환경 변수 `VERCEL=1`에서 `npm run build`가 성공하며 자산 경로가 `/assets/...`인지 확인했다.
-- `vercel-othello`의 깨끗한 임시 worktree에서 `vercel deploy --temporary --yes --logs`를 실행했다. 설치, 빌드, 배포가 성공해 임시 Preview가 준비됐다: <https://temporary-speedy-spinel-tk2ys5s.vercel.app/>.
-- Preview 페이지와 JavaScript, CSS 요청은 모두 HTTP 200을 반환했다. 임시 Preview는 60분 후 만료되며 Vercel 계정으로 claim하면 유지할 수 있다. claim 링크는 사용자에게 직접 제공하고 공개 저장소 문서에는 기록하지 않는다.
+- `vercel-othello`의 깨끗한 임시 worktree에서 `vercel deploy --temporary --yes --logs`를 실행했다. 설치, 빌드, 배포가 성공해 임시 URL이 준비됐다: <https://temporary-speedy-spinel-tk2ys5s.vercel.app/>.
+- 임시 배포의 페이지와 JavaScript, CSS 요청은 모두 HTTP 200을 반환했다. 이 배포는 60분 후 만료되며 Vercel 계정으로 claim하면 유지할 수 있다. claim 링크는 사용자에게 직접 제공하고 공개 저장소 문서에는 기록하지 않는다.
 - 계속 사용하려면 Vercel 계정에 로그인해 Preview를 claim하거나, Vercel 대시보드에서 GitHub 저장소를 가져와 `vercel-othello` 브랜치 Preview 자동 배포를 설정한다.
